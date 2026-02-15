@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  cpms-mock:
+    image: golang:1.22
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: ["go", "run", "./cmd/cpms-mock"]
+    ports:
+      - "8081:8081"
+    environment:
+      - CPMS_MOCK_ADDR=:8081
+      - CPMS_MOCK_ALLOW_SECRET=devsecret
+
+  gateway:
+    image: golang:1.22
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: ["go", "run", "./cmd/gateway"]
+    ports:
+      - "8080:8080"
+    environment:
+      - LISTEN_ADDR=:8080
+      - CPMS_BASE_URL=http://cpms-mock:8081
+      - CPMS_API_KEY=dev
+      - REQUIRE_CPMS_AUTH=true
+      - DEFAULT_HEARTBEAT_INTERVAL=300
+    depends_on:
+      - cpms-mock
